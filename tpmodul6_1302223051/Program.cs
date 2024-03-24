@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics.Metrics;
 
 namespace tpmodul6_1302223051
 {
@@ -15,6 +16,22 @@ namespace tpmodul6_1302223051
         static void Main(string[] args)
         {
             SayaTubeVideo video = new SayaTubeVideo("Tutorial Design By Contract - Ricky Renaldi");
+            video.PrintVideoDetails();
+
+            try
+            {
+                video.IncreasePlayCount(10000001);
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine("ArgumentException: " + ex.Message);
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                video.IncreasePlayCount(200000);
+            }
+
             video.PrintVideoDetails();
         }
     }
@@ -36,7 +53,27 @@ namespace tpmodul6_1302223051
 
         public void IncreasePlayCount(int playCount)
         {
-            this.playCount += playCount;
+            if (string.IsNullOrEmpty(title) || title.Length > 100)
+            {
+                throw new ArgumentException("Judul video memiliki panjang maksimal 100 karakter dan tidak berupa null.");
+            }
+
+            if (playCount < 0 || playCount > 10000000)
+            {
+                throw new ArgumentException("play count maksimal 10.000.000 per panggilan method-nya.");
+            }
+
+            try
+            {
+                checked
+                {
+                    this.playCount += playCount;
+                }
+            }
+            catch (OverflowException pesan)
+            {
+                Console.WriteLine("Terjadi overflow : " + pesan.Message);
+            }
         }
 
         public void PrintVideoDetails()
